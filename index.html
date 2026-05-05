@@ -17,6 +17,9 @@
     <nav id="main-tabs" class="tabs" role="tablist" aria-label="Main tabs">
       <button type="button" class="tab-btn active" data-target="tab1" role="tab" aria-selected="true">Welcome</button>
 
+      <!-- My Sketch -->
+      <button type="button" class="tab-btn" data-target="tab-sk1" data-sketch="sk1" role="tab">Sketch 1</button>
+
       <!-- Homework 4 -->
       <button type="button" class="tab-btn" data-target="tab2" data-sketch="sk2" role="tab">HWK 4.1</button>
       <button type="button" class="tab-btn" data-target="tab3" data-sketch="sk3" role="tab">HWK 4.2</button>
@@ -59,15 +62,24 @@
       </div>
     </section>
 
+    <!-- My Sketch 1 -->
+    <section id="tab-sk1" class="tab-content" role="tabpanel">
+      <div id="sketch-container-sk1" class="sketch-container"></div>
+    </section>
+
+
     <!-- Homework 4: Sketch 1 -->
     <section id="tab2" class="tab-content" role="tabpanel">
       <div id="sketch-container-sk2" class="sketch-container"></div>
       <div id="sketch-drawing-sk2" class="sketch-evolution">
         <div class="welcome-template hwk-template" aria-labelledby="sk2-notes-title">
           <h3 id="sk2-notes-title">Documenting iterative process</h3>
-          <p class="small-note">Replace placeholders with your own notes and images.</p>
+          <p class="small-note">Treadmill Calorie Clock — Gym Context</p>
           <p>
-            Context of use: Explain where your clocks/timers would be used, by whom, and what problem they help solve. [add 2-3 sentences]
+            A workout timer for treadmill users. Instead of watching seconds tick, you see food icons
+            around the dial showing what you've burned — peanuts at 5 min, egg at 15, cola at 25,
+            fries at 40, cheeseburger at 55. Press Space to start. Each food lights up when the
+            minute hand reaches it; the right panel tracks how many times you've earned each one.
           </p>
 
           <article class="clock-template">
@@ -75,36 +87,64 @@
             <p class="small-note">Sketch iteration documentation (paper/hand-drawn photos)</p>
             <div class="iteration-grid">
               <figure class="iteration-item">
-                <!-- <img src="images/clock1-sketch1.jpg" alt="Clock 1 sketch iteration 1" /> -->
-                <div class="image-placeholder">Clock 1 sketch photo 1</div>
+                <img src="images/clock1-sketch-1.jpg" alt="Clock 1 sketch iteration 1" />
               </figure>
               <figure class="iteration-item">
-                <!-- <img src="images/clock1-sketch2.jpg" alt="Clock 1 sketch iteration 2" /> -->
-                <div class="image-placeholder">Clock 1 sketch photo 2</div>
+                <img src="images/clock1-sketch-2.jpg" alt="Clock 1 sketch iteration 2" />
               </figure>
             </div>
-            <p>
-              Design process: In 1–2 paragraphs (or bullet points), explain how this clock evolved from sketches to final
-              form. Name the information visualization principles you applied (readability, hierarchy, color, layout,
-              interaction, accessibility). [mention 2-3 design decisions and why]
-            </p>
-            <p>
-              Self-reflection / future work: What would you improve next, and why? [add two improvements you'd make and explain why]
-            </p>
+            <p><strong>Design process:</strong></p>
+            <ul>
+              <li>
+                <strong>Food as time units:</strong> Each food is placed at its calorie-equivalent
+                minute (~8 kcal/min). This turns abstract time into a motivational goal — you're
+                running toward a cheeseburger, not just a number.
+              </li>
+              <li>
+                <strong>One food at a time:</strong> Only the food the hand is currently pointing
+                at shows in full color; the rest are grayed out. This uses pre-attentive processing —
+                the active item pops out instantly with no effort.
+              </li>
+              <li>
+                <strong>Three time layers:</strong> Minute hand, second hand, and a digital readout
+                all show time at once. Each serves a different need — glancing, rhythm, precision.
+              </li>
+              <li>
+                <strong>Iteration:</strong> Early drafts had food icons inside the ring, overlapping
+                the tick marks. Moved them outside, switched to light background, simplified ticks
+                to every 5 minutes.
+              </li>
+            </ul>
+            <p><strong>Self-reflection / future work:</strong></p>
+            <ul>
+              <li>
+                The calorie rate (~8 kcal/min) is fixed. Ideally users could enter their weight
+                and speed so food positions adjust to their actual burn rate.
+              </li>
+              <li>
+                The gray effect uses a semi-transparent circle over the emoji — a workaround.
+                Custom SVG icons would give true grayscale and look cleaner across browsers.
+              </li>
+            </ul>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- Homework 4: Sketch 1 -->
+
+    <!-- Homework 4: Sketch 2 -->
     <section id="tab3" class="tab-content" role="tabpanel">
       <div id="sketch-container-sk3" class="sketch-container"></div>
       <div id="sketch-drawing-sk3" class="sketch-evolution">
         <div class="welcome-template hwk-template" aria-labelledby="sk3-notes-title">
           <h3 id="sk3-notes-title">Documenting iterative process</h3>
-          <p class="small-note">Replace placeholders with your own notes and images.</p>
+          <p class="small-note">Mario Planet Clock — Gym Context</p>
           <p>
-            Context of use: Explain where your clocks/timers would be used, by whom, and what problem they help solve. [add 2-3 sentences]
+            A game-inspired treadmill clock. Mario runs around a planet split into five terrain zones:
+            Plain, Mountain, Ice, Desert, and Monster. Each zone warps the clock ring — slow zones
+            get less arc, fast zones get more — so 30 minutes is never at the halfway point. In the
+            Monster zone, a pixel-art Goomba waits at the entrance and chases Mario once he arrives.
+            Click anywhere to shuffle the terrain order.
           </p>
 
           <article class="clock-template">
@@ -112,21 +152,48 @@
             <p class="small-note">Sketch iteration documentation (paper/hand-drawn photos)</p>
             <div class="iteration-grid">
               <figure class="iteration-item">
-                <!-- <img src="images/clock2-sketch1.jpg" alt="Clock 2 sketch iteration 1" /> -->
-                <div class="image-placeholder">Clock 2 sketch photo 1</div>
+                <img src="images/clock2-sketch-1.jpg" alt="Clock 2 sketch iteration 1" />
               </figure>
               <figure class="iteration-item">
-                <!-- <img src="images/clock2-sketch2.jpg" alt="Clock 2 sketch iteration 2" /> -->
-                <div class="image-placeholder">Clock 2 sketch photo 2</div>
+                <img src="images/clock2-sketch-2.jpg" alt="Clock 2 sketch iteration 2" />
               </figure>
             </div>
-            <p>
-              Design process: In 1–2 paragraphs (or bullet points), explain your iterations and final decisions. Make
-              explicit which visualization considerations shaped the result. [mention 2-3 design decisions and why]
-            </p>
-            <p>
-              Self-reflection / future work: What would you improve next, and why? [add two improvements you'd make and explain why]
-            </p>
+            <p><strong>Design process:</strong></p>
+            <ul>
+              <li>
+                <strong>Non-linear time:</strong> Each zone has a speed multiplier (Mountain 0.5×,
+                Plain 1×, Desert 0.7×, Ice 2×, Monster 3×) that sets both how fast Mario moves
+                and how wide the arc appears. The ring becomes a map of subjective effort — hard
+                zones feel long but look short.
+              </li>
+              <li>
+                <strong>Pixel-art characters:</strong> Mario and Goomba are hand-coded in p5.js
+                using 12-column pixel grids. Mario's walk speed scales with the terrain multiplier.
+                The Goomba has its own two-frame cycle and only activates inside the Monster zone.
+              </li>
+              <li>
+                <strong>Goomba chase:</strong> Goomba waits at the Monster zone start, then chases
+                at half Mario's speed when Mario enters. It's capped at the zone boundary so it
+                never follows Mario out — the tension resets every lap.
+              </li>
+              <li>
+                <strong>Shuffle interaction:</strong> Clicking reshuffles the zone order, showing
+                how the same 60 minutes looks completely different with a different effort layout.
+                Background changed from dark space to a light sky after feedback it felt more
+                gym-appropriate.
+              </li>
+            </ul>
+            <p><strong>Self-reflection / future work:</strong></p>
+            <ul>
+              <li>
+                Zone sizes are fixed. A better version would sync with real treadmill speed and
+                incline data to generate terrain from actual workout intensity.
+              </li>
+              <li>
+                Pixel sprites use <code>rect()</code> at 3px/pixel which can look blurry on
+                high-DPI screens. Pre-rendering with <code>createGraphics()</code> would fix this.
+              </li>
+            </ul>
           </article>
         </div>
       </div>
