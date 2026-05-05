@@ -9,6 +9,7 @@ window.registerSketch = function (id, factory) {
 
 // map sketch ids to script paths
 const SKETCH_SCRIPT_BY_ID = {
+    sk1: 'sketches/sketch1.js',
     sk2: 'sketches/sketch2-hwk4-1.js',
     sk3: 'sketches/sketch3-hwk4-2.js',
     sk4: 'sketches/sketch4.js',
