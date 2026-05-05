@@ -172,35 +172,52 @@ registerSketch('sk2', function (p) {
     p.circle(CX, CY, 4);
   }
 
-  function drawHourBadge(completedHours, elapsedMin) {
-    if (completedHours < 1) return;
-    let m       = elapsedMin % 60;
-    let closest = FOODS.reduce((a, f) =>
-      p.abs(m - f.minute) < p.abs(m - a.minute) ? f : a
-    );
-    let bx = 690, by = 72;
+  function drawHourBadge(elapsedMin) {
+    // Per-food count: how many times each food's minute mark has been passed
+    let earned = FOODS.map(f => ({
+      emoji: f.emoji,
+      count: elapsedMin >= f.minute
+        ? Math.floor((elapsedMin - f.minute) / 60) + 1
+        : 0,
+    })).filter(f => f.count > 0);
+
+    if (earned.length === 0) return;
+
+    let padX = 14, padY = 10, rowH = 28, w = 130;
+    let h = padY * 2 + 16 + earned.length * rowH;
+    let bx = CANVAS_SIZE - 14, by = 62;
+
     p.noStroke();
     p.fill(255, 255, 255, 230);
-    p.rect(bx - 60, by - 36, 120, 78, 14);
+    p.rect(bx - w, by - padY, w, h, 12);
     p.stroke(...C.border);
     p.strokeWeight(1);
-    p.rect(bx - 60, by - 36, 120, 78, 14);
+    p.rect(bx - w, by - padY, w, h, 12);
+
     p.noStroke();
     p.fill(...C.textSub);
     p.textSize(10);
-    p.textAlign(p.CENTER, p.CENTER);
-    p.text('LAPS BURNED', bx, by - 20);
-    p.textSize(26);
-    p.text(closest.emoji.repeat(Math.min(completedHours, 4)), bx, by + 16);
-    if (completedHours > 4) {
+    p.textStyle(p.BOLD);
+    p.textAlign(p.LEFT, p.CENTER);
+    p.text('LAPS BURNED', bx - w + padX, by - padY + 10);
+    p.textStyle(p.NORMAL);
+
+    for (let i = 0; i < earned.length; i++) {
+      let ry = by + 8 + i * rowH;
+      p.textSize(20);
+      p.textAlign(p.LEFT, p.CENTER);
+      p.text(earned[i].emoji, bx - w + padX, ry);
       p.fill(...C.textMain);
-      p.textSize(11);
-      p.text('×' + completedHours, bx, by + 38);
+      p.textSize(13);
+      p.textStyle(p.BOLD);
+      p.textAlign(p.LEFT, p.CENTER);
+      p.text('×' + earned[i].count, bx - w + padX + 30, ry);
+      p.textStyle(p.NORMAL);
     }
   }
 
   function drawTimeDisplay(elapsedMin, elapsedSec) {
-    let display = p.nf(p.floor(elapsedMin), 2) + ':' + p.nf(p.floor(elapsedSec % 60), 2);
+    let display = p.nf(p.floor(elapsedMin), 2) + ':' + p.nf(p.floor((elapsedMin % 1) * 60), 2);
     let by = CY + DIAL_R + 96;
     p.noStroke();
     p.fill(255, 255, 255, 240);
@@ -284,14 +301,14 @@ registerSketch('sk2', function (p) {
     if (isRunning && workoutStartTime !== null) {
       elapsedSec += (p.millis() - workoutStartTime) / 1000;
     }
-    let elapsedMin = elapsedSec / 60;
+    let elapsedMin = elapsedSec; // TEST MODE: 1 second = 1 "minute"
 
     drawTitle();
     drawDial();
     drawFoods(elapsedMin % 60);
     drawMinuteHand(elapsedMin);
     drawSecondHand(elapsedSec);     // orange second hand
-    drawHourBadge(p.floor(elapsedMin / 60), elapsedMin);
+    drawHourBadge(elapsedMin);
     drawStatus();
 
     if (!isRunning && totalSeconds === 0) {
