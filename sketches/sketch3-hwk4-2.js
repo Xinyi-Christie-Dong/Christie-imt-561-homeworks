@@ -27,11 +27,11 @@ registerSketch('sk3', function (p) {
   };
 
   const TERRAIN_TYPES = {
-    plain:    { name: 'Plain',    speedMult: 1.0, color: [100, 190, 70],  label: '🌿 Plain',   desc: 'Normal pace' },
-    mountain: { name: 'Mountain', speedMult: 0.5, color: [155, 125, 95],  label: '⛰️ Mountain', desc: 'Slow — steep climb' },
-    ice:      { name: 'Ice',      speedMult: 2.0, color: [160, 220, 250], label: '🧊 Ice',      desc: 'Fast — slippery!' },
-    desert:   { name: 'Desert',   speedMult: 0.7, color: [235, 200, 100], label: '🏜️ Desert',  desc: 'Draining heat' },
-    boost:    { name: 'Boost',    speedMult: 3.0, color: [255, 150, 40],  label: '⚡ Boost',    desc: 'Warp speed!' },
+    plain:    { name: 'Plain',    speedMult: 1.0, color: [100, 190, 70],  label: '🌿 Plain',    desc: 'Normal pace' },
+    mountain: { name: 'Mountain', speedMult: 0.5, color: [155, 125, 95],  label: '⛰️ Mountain',  desc: 'Slow — steep climb' },
+    ice:      { name: 'Ice',      speedMult: 2.0, color: [160, 220, 250], label: '🧊 Ice',        desc: 'Fast — slippery!' },
+    desert:   { name: 'Desert',   speedMult: 0.7, color: [235, 200, 100], label: '🏜️ Desert',    desc: 'Draining heat' },
+    monster:  { name: 'Monster',  speedMult: 3.0, color: [255, 140, 40],  label: '👾 Monster',   desc: 'Run! Goomba is chasing!' },
   };
 
   let zones = buildZones([
@@ -40,7 +40,7 @@ registerSketch('sk3', function (p) {
     { type: 'ice',      realMin: 8  },
     { type: 'desert',   realMin: 15 },
     { type: 'plain',    realMin: 8  },
-    { type: 'boost',    realMin: 4  },
+    { type: 'monster',  realMin: 4  },
     { type: 'mountain', realMin: 3  },
   ]);
 
@@ -83,7 +83,7 @@ registerSketch('sk3', function (p) {
   function getElapsedMin() {
     let sec = savedSeconds;
     if (isRunning && workoutStart !== null) sec += (p.millis() - workoutStart) / 1000;
-    return sec / 60;
+    return sec; // TEST MODE: 1 second = 1 "minute", full cycle = 60 seconds
   }
 
   function getCurrentZone(realMin) {
@@ -138,7 +138,7 @@ registerSketch('sk3', function (p) {
       let dy = CY + (PLANET_R + 11) * p.sin(mid);
       p.textSize(16);
       p.textAlign(p.CENTER, p.CENTER);
-      const icons = { plain:'🌿', mountain:'⛰️', ice:'🧊', desert:'🌵', boost:'⚡' };
+      const icons = { plain:'🌿', mountain:'⛰️', ice:'🧊', desert:'🌵', monster:'👾' };
       p.text(icons[z.type], dx, dy);
     }
 
@@ -196,32 +196,109 @@ registerSketch('sk3', function (p) {
     p.arc(CX, CY, (PLANET_R + 1)*2, (PLANET_R + 1)*2, -p.HALF_PI, angle);
   }
 
-  // ── Pixel Mario ───────────────────────────────────────────────
-  const MARIO_FRAMES = [
-    ['....RRRR....','...RRRRRR...','...KKSSS...','..KSSSWS...','..SSSSSS...','..BBSBBS....','.BBBBBBB....','B.BBB.B.....','..BBBBB.....','..SS.SS.....','..SK.KS.....','..KK.KK.....'],
-    ['....RRRR....','...RRRRRR...','...KKSSS....','..KSSSWS....','..SSSSSS....','..BBSBBS....', '.BBBBBBB....', '.B.BBB.B....', '..SBBBS.....', '..SK..KK....', '..KK..SS....', '.......KK...'],
-    ['....RRRR....','...RRRRRR...','...KKSSS....','..KSSSWS....','..SSSSSS....','..BBSBBS....', '.BBBBBBB....', '.B.BBB.B....', '..BBBBB.....', '..SS.SS.....', '.KS...SK....', '.KK...KK....'],
-    ['....RRRR....','...RRRRRR...','...KKSSS....','..KSSSWS....','..SSSSSS....','..BBSBBS....', '.BBBBBBB....', '.B.BBB.B....', '.SBBBS......', '.KK..KS.....', '.SS..KK.....', '...KK.......'],
-  ];
-  const MARIO_IDLE = ['....RRRR....','...RRRRRR...','...KKSSS....','..KSSSWS....','..SSSSSS....','..BBSBBS....', '.BBBBBBB....', '.B.BBB.B....', '..BBBBB.....', '..SS.SS.....', '..SK.KS.....', '..KK.KK.....'];
-
-  const COLOR_MAP = {
-    'R':[220,50,30], 'S':[255,200,150], 'B':[60,100,220],
-    'K':[120,70,30], 'W':[255,255,255], 'b':[20,20,20], '.':[0,0,0,0],
+  // ── Pixel Goomba ─────────────────────────────────────────────
+  const GOOMBA_COLORS = {
+    'D': [75,  38,  8],    // dark brown outline
+    'B': [148, 80,  18],   // medium brown body
+    'T': [208, 148, 58],   // tan face
+    'W': [238, 232, 218],  // white eye
+    'b': [18,  14,  8],    // black pupil / eyebrow
+    'F': [175, 108, 30],   // foot
+    '.': null,
   };
 
-  function drawPixelMario(frame, px, py, sc) {
-    let cols = frame[0].length, rows = frame.length;
-    let offX = -(cols/2)*sc, offY = -(rows/2)*sc;
+  const GOOMBA_FRAMES = [
+    [  // frame 0: feet together
+      '....DDDDDD..',
+      '..DDBBBBBBDD',
+      '.DBBTTTTBBBD',
+      'DBbbBTTTbbBD',
+      'DBWbBTTTWbBD',
+      'DBBBBBBBBBBD',
+      '.BBBBBBBBBB.',
+      '.BBBBBBBBBB.',
+      '..DBBBBBBD..',
+      '..FB....BF..',
+    ],
+    [  // frame 1: feet apart
+      '....DDDDDD..',
+      '..DDBBBBBBDD',
+      '.DBBTTTTBBBD',
+      'DBbbBTTTbbBD',
+      'DBWbBTTTWbBD',
+      'DBBBBBBBBBBD',
+      '.BBBBBBBBBB.',
+      '.BBBBBBBBBB.',
+      '..DBBBBBBD..',
+      '.FB......BF.',
+    ],
+  ];
+
+  function drawPixelSprite(grid, colorMap, px, py, sc) {
+    let cols = grid[0].length, rows = grid.length;
+    let offX = -(cols / 2) * sc, offY = -(rows / 2) * sc;
     p.noStroke();
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        let c = COLOR_MAP[frame[row][col]];
-        if (!c || c.length === 4) continue;
+        let c = colorMap[grid[row][col]];
+        if (!c) continue;
         p.fill(c[0], c[1], c[2]);
-        p.rect(px + offX + col*sc, py + offY + row*sc, sc, sc);
+        p.rect(px + offX + col * sc, py + offY + row * sc, sc, sc);
       }
     }
+  }
+
+  function getMonsterZone() {
+    return zones.find(z => z.type === 'monster') || null;
+  }
+
+  function drawGoomba(elapsedMin) {
+    let mz = getMonsterZone();
+    if (!mz) return;
+
+    let minInCycle = elapsedMin % 60;
+
+    // Goomba real-minute position:
+    // Before Mario arrives at monster zone → wait at zone start
+    // After Mario enters → chase at half Mario's speed (speedMult*0.5 = 1.5x)
+    let goombaPosMin;
+    if (minInCycle < mz.realStart) {
+      goombaPosMin = mz.realStart;  // waiting at zone entrance
+    } else {
+      let chaseProgress = (minInCycle - mz.realStart) * 0.5;
+      // Cap at zone end — Goomba never leaves the monster zone
+      goombaPosMin = Math.min(mz.realStart + chaseProgress, mz.realEnd - 0.01);
+    }
+
+    let angle  = realMinToAngle(goombaPosMin);
+    let goombaR = PLANET_R + 18;
+    let gx = CX + goombaR * p.cos(angle);
+    let gy = CY + goombaR * p.sin(angle);
+
+    let chasing = isRunning && minInCycle >= mz.realStart;
+    let bounce  = chasing ? p.sin(p.frameCount * 0.2) * 3 : 0;
+
+    p.push();
+    p.translate(gx, gy);
+    p.rotate(angle + p.HALF_PI);
+    p.translate(0, bounce);
+
+    // Angry flash when chasing
+    if (chasing) {
+      let fr = p.floor(p.frameCount * 0.2) % GOOMBA_FRAMES.length;
+      drawPixelSprite(GOOMBA_FRAMES[fr], GOOMBA_COLORS, 0, 0, 3);
+      // Anger marks above head
+      p.noStroke();
+      p.fill(220, 50, 30, 200);
+      p.textSize(12);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.text('😤', 0, -22);
+    } else {
+      // Idle: standing, waiting
+      drawPixelSprite(GOOMBA_FRAMES[0], GOOMBA_COLORS, 0, 0, 3);
+    }
+
+    p.pop();
   }
 
   function drawMario(elapsedMin) {
@@ -246,12 +323,12 @@ registerSketch('sk3', function (p) {
     }
     drawPixelMario(frame, 0, 0, 3);
 
-    if (isRunning && zone.type === 'boost') {
+    // Monster zone: fear sweat drops
+    if (isRunning && zone.type === 'monster') {
       p.noStroke();
-      for (let i = 1; i <= 3; i++) {
-        p.fill(255, 180, 50, p.map(i, 1, 3, 160, 30));
-        p.circle(-i*10, p.sin(p.frameCount*0.3+i)*4, p.map(i,1,3,8,18));
-      }
+      p.textSize(12);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.text('😱', 0, -22);
     }
     if (isRunning && zone.type === 'mountain') {
       p.textSize(14); p.textAlign(p.CENTER, p.CENTER);
@@ -259,6 +336,23 @@ registerSketch('sk3', function (p) {
     }
     p.pop();
   }
+  const MARIO_FRAMES = [
+    ['....RRRR....','...RRRRRR...','...KKSSS...','..KSSSWS...','..SSSSSS...','..BBSBBS....','.BBBBBBB....','B.BBB.B.....','..BBBBB.....','..SS.SS.....','..SK.KS.....','..KK.KK.....'],
+    ['....RRRR....','...RRRRRR...','...KKSSS....','..KSSSWS....','..SSSSSS....','..BBSBBS....', '.BBBBBBB....', '.B.BBB.B....', '..SBBBS.....', '..SK..KK....', '..KK..SS....', '.......KK...'],
+    ['....RRRR....','...RRRRRR...','...KKSSS....','..KSSSWS....','..SSSSSS....','..BBSBBS....', '.BBBBBBB....', '.B.BBB.B....', '..BBBBB.....', '..SS.SS.....', '.KS...SK....', '.KK...KK....'],
+    ['....RRRR....','...RRRRRR...','...KKSSS....','..KSSSWS....','..SSSSSS....','..BBSBBS....', '.BBBBBBB....', '.B.BBB.B....', '.SBBBS......', '.KK..KS.....', '.SS..KK.....', '...KK.......'],
+  ];
+  const MARIO_IDLE = ['....RRRR....','...RRRRRR...','...KKSSS....','..KSSSWS....','..SSSSSS....','..BBSBBS....', '.BBBBBBB....', '.B.BBB.B....', '..BBBBB.....', '..SS.SS.....', '..SK.KS.....', '..KK.KK.....'];
+
+  const COLOR_MAP = {
+    'R':[220,50,30], 'S':[255,200,150], 'B':[60,100,220],
+    'K':[120,70,30], 'W':[255,255,255], 'b':[20,20,20], '.': null,
+  };
+
+  function drawPixelMario(frame, px, py, sc) {
+    drawPixelSprite(frame, COLOR_MAP, px, py, sc);
+  }
+
 
   // ── Legend ────────────────────────────────────────────────────
   function drawLegend() {
@@ -367,6 +461,7 @@ registerSketch('sk3', function (p) {
     drawPlanet();
     drawMinuteMarkers();
     drawOrbit(elapsedMin);
+    drawGoomba(elapsedMin);
     drawMario(elapsedMin);
     drawLegend();
     drawTitle();
@@ -396,7 +491,7 @@ registerSketch('sk3', function (p) {
   };
 
   p.mousePressed = function () {
-    let types = ['plain', 'mountain', 'ice', 'desert', 'boost'];
+    let types = ['plain', 'mountain', 'ice', 'desert', 'monster'];
     let realMins = [12, 10, 8, 8, 6, 10, 6];
     let shuffled = [...types].sort(() => p.random() - 0.5);
     zones = buildZones(realMins.map((m, i) => ({ type: shuffled[i % shuffled.length], realMin: m })));
