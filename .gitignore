@@ -1,2 +1,4 @@
 // Not allowing students to mistakenly commit to ./script.js
 ./script.js.claude/
+.DS_Store
+data/.DS_Store
